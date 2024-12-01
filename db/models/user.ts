@@ -21,7 +21,7 @@ export const defineUserModel = (sequelize: Sequelize) =>
         type: DataTypes.STRING,
         // allowNull defaults to true
       },
-      imagePath: {
+      profile: {
         type: DataTypes.STRING,
         allowNull: true,
         // allowNull defaults to true

@@ -2,6 +2,8 @@ import "pg";
 import "pg-hstore";
 import { Sequelize } from "sequelize";
 import { defineUserModel } from "./models/user.ts";
+import { defineConversationModel } from "./models/conversation.ts";
+import { defineMessageModel } from "./models/message.ts";
 
 export const sequelize = new Sequelize(
   "ride-sharing",
@@ -18,7 +20,23 @@ export const assertDbConnection = async () => {
   try {
     // file дотор өөрчлөлт орохоор үүнийг уншуулдаг байвал ямар вэ?
     await sequelize.authenticate();
-    defineUserModel(sequelize).sync({ alter: false });
+    const User = defineUserModel(sequelize);
+    const Conversation = defineConversationModel(sequelize);
+    const Message = defineMessageModel(sequelize);
+
+    Message.sync({
+      alter: false,
+    });
+
+    User.sync({ alter: false });
+
+    Conversation.sync({
+      alter: false,
+    });
+
+    Conversation.belongsTo(User);
+    Message.belongsTo(Conversation);
+    Message.belongsTo(User);
 
     console.log("Connection has been established successfully.");
   } catch (error) {
