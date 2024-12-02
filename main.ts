@@ -1,4 +1,3 @@
-// @deno-types="npm:@types/express@4.17.15"
 import "@std/dotenv/load";
 import { Application } from "jsr:@oak/oak/application";
 import { Router } from "jsr:@oak/oak/router";

@@ -6,10 +6,11 @@ import {
 } from "../services/conversationService.ts";
 import { debug } from "../utils/debug.ts";
 import { getMessagesByConversationId } from "../services/messageService.ts";
+import { AppContext } from "../types/base.ts";
+import { MessageAttributes } from "../db/models/message.ts";
 
 export const getConversationsByUserController: Middleware = async (
   ctx,
-  next,
 ) => {
   const userId = ctx.state.userId;
   const conversations = await getConversationsByUserId(userId);
@@ -18,9 +19,8 @@ export const getConversationsByUserController: Middleware = async (
   };
 };
 
-export const createConversationByUserController: Middleware = async (
-  ctx,
-  next,
+export const createConversationByUserController = async (
+  ctx: AppContext,
 ) => {
   const { receiverId } = ctx.params;
   const { userId, content } = ctx.state;
@@ -32,6 +32,7 @@ export const createConversationByUserController: Middleware = async (
   );
 
   ctx.response.body = {
+    message: "Conversation is created.",
     data: {
       conversationId: conversation.dataValues.id,
     },
@@ -39,7 +40,7 @@ export const createConversationByUserController: Middleware = async (
 };
 
 export const sendMessageToConversationController: Middleware = async (
-  ctx,
+  ctx: AppContext,
   next,
 ) => {
   const body = ctx.request.body;
@@ -52,14 +53,13 @@ export const sendMessageToConversationController: Middleware = async (
     userId,
     content,
   );
-
   ctx.response.body = {
     message: "Message sent successfully",
   };
 };
 
 export const getMessagesByConversationIdController: Middleware = async (
-  ctx,
+  ctx: AppContext,
 ) => {
   const { userId } = ctx.state;
   const { conversationId } = ctx.params;
@@ -67,6 +67,9 @@ export const getMessagesByConversationIdController: Middleware = async (
   const messages = await getMessagesByConversationId(conversationId, userId);
 
   ctx.response.body = {
-    data: messages,
+    status: "success",
+    data: {
+      messages,
+    },
   };
 };
