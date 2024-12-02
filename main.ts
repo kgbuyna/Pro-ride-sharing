@@ -7,12 +7,13 @@ import { authenticateToken } from "./middleware/authenticateToken.ts";
 import authRouter from "./routes/authRouter.ts";
 import conversationRouter from "./routes/conversationRouter.ts";
 import userRouter from "./routes/userRouter.ts";
+import { errorHandler } from "./middleware/errorHandler.ts";
 
 const router = new Router();
 
 const app = new Application();
 
-// assertDbConnection();
+assertDbConnection();
 
 router.use("/auth", authRouter.routes(), authRouter.allowedMethods());
 router.use(
@@ -27,6 +28,7 @@ router.use(authenticateToken).use(
   conversationRouter.allowedMethods(),
 );
 
+app.use(errorHandler);
 app.use(router.routes());
 
 await app.listen({ port: 3000 });

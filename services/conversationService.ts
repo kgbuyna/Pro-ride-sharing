@@ -1,24 +1,37 @@
 import { Op } from "sequelize";
 import { createMessage } from "./messageService.ts";
 import Conversations from "../db/models/conversation.ts";
+import { id } from "../types/base.ts";
+import { debug } from "../utils/debug.ts";
+import Users from "../db/models/user.ts";
 
 export const createConversationByUser = async (
-  senderId,
-  receiverId,
-  content,
+  senderId: id,
+  receiverId: id,
+  content: string,
 ) => {
+  const isUserExist = await Users.findByPk(receiverId);
+
+  if (!isUserExist) {
+    throw new Error(`Хэрэглэгч олдсонгүй. ${receiverId}`);
+  }
+
   const [conversation] = await Conversations.findOrCreate({
     where: {
-      [Op.or]: {
-        [Op.and]: {
-          user1Id: receiverId,
-          user2Id: senderId,
+      [Op.or]: [
+        {
+          [Op.and]: {
+            user1Id: receiverId,
+            user2Id: senderId,
+          },
         },
-        [Op.and]: {
-          user1Id: senderId,
-          user2Id: receiverId,
+        {
+          [Op.and]: {
+            user1Id: senderId,
+            user2Id: receiverId,
+          },
         },
-      },
+      ],
     },
     defaults: {
       user1Id: receiverId,
@@ -26,10 +39,14 @@ export const createConversationByUser = async (
     },
   });
 
-  const message = await createMessage(conversation.id, senderId, content);
+  const message = await createMessage(
+    conversation.dataValues.id as id,
+    senderId,
+    content,
+  );
 
   conversation.set({
-    "lastMessageId": message.id,
+    "lastMessageId": message.dataValues.id,
   });
 
   await conversation.save();
@@ -38,7 +55,7 @@ export const createConversationByUser = async (
 };
 
 export const getConversationsByUserId = async (userId: number) => {
-  const conversations = Conversations.findAll({
+  const conversations = await Conversations.findAll({
     where: {
       [Op.or]: [
         { user1Id: userId },
@@ -50,35 +67,39 @@ export const getConversationsByUserId = async (userId: number) => {
 };
 
 export const findConversationByUserId = async (
-  conversationId: number,
-  senderId: number,
+  conversationId: id,
+  senderId: id,
 ) => {
   const conversation = await Conversations.findOne({
     where: {
       [Op.or]: {
-        sender_1: senderId,
-        sender_2: senderId,
+        user1Id: senderId,
+        user2Id: senderId,
       },
       id: conversationId,
     },
   });
+  if (!conversation) {
+    throw new Error("Conversation олдсонгүй.");
+  }
   return conversation;
 };
 
 export const sendMessageToConversation = async (
-  conversationId,
-  userId,
-  content,
+  conversationId: id,
+  userId: id,
+  content: string,
 ) => {
   const conversation = await findConversationByUserId(conversationId, userId);
-  if (!conversation) {
-    return null;
-  }
 
-  const message = await createMessage(conversation.id, userId, content);
+  const message = await createMessage(
+    conversation.toJSON().id as id,
+    userId,
+    content,
+  );
 
   conversation.set({
-    "lastMessageId": message.id,
+    lastMessageId: message.dataValues.id,
   });
 
   await conversation.save();

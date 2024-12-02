@@ -1,7 +1,12 @@
 import Messages from "../db/models/message.ts";
+import { id } from "../types/base.ts";
 import { findConversationByUserId } from "./conversationService.ts";
 
-export const createMessage = async (conversationId, senderId, content) => {
+export const createMessage = async (
+  conversationId: id,
+  senderId: id,
+  content: string,
+) => {
   const message = await Messages.create({
     conversationId: conversationId,
     senderId: senderId,
@@ -10,16 +15,20 @@ export const createMessage = async (conversationId, senderId, content) => {
   return message;
 };
 
-export const getMessagesByConversationId = async (conversationId, userId) => {
+export const getMessagesByConversationId = async (
+  conversationId: id,
+  userId: id,
+) => {
   const conversation = await findConversationByUserId(conversationId, userId);
   if (!conversation) {
-    return null;
+    throw new Error("Conversation олдсонгүй.");
   }
 
-  const messages = Messages.findAll({
+  const messages = await Messages.findAll({
     where: {
-      conversationId: conversation.id,
+      conversationId: conversation.dataValues.id,
     },
-  });
+  }) || [];
+
   return messages;
 };

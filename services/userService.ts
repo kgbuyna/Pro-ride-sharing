@@ -1,4 +1,3 @@
-import { sequelize } from "../db/index.ts";
 import * as bcrypt from "jsr:@ts-rex/bcrypt";
 
 import jwt from "npm:jsonwebtoken";
@@ -12,7 +11,7 @@ export const getUsers = async () => {
 
 export const createUser = async (userData) => {
   const { username, email, firstName, lastName, password, profile, phone } =
-    body;
+    userData;
 
   const hashedPassword = bcrypt.hash(password);
   const user = await Users.create({

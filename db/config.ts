@@ -9,6 +9,7 @@ const sequelize = new Sequelize(
     dialect:
       "postgres", /* one of 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql' | 'db2' | 'snowflake' | 'oracle' */
   },
+  // rejectOnEmpty: true, // Throw an error if no user is found
 );
 
 export default sequelize;

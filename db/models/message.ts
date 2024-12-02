@@ -1,10 +1,11 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config.ts";
+import { id } from "../../types/base.ts";
 // Define MessageAttributes
 interface MessageAttributes {
-  id: number; // Primary key
-  conversationId: number; // Foreign key for the conversation
-  senderId: number; // Foreign key for the sender
+  id: id; // Primary key
+  conversationId: id; // Foreign key for the conversation
+  senderId: id; // Foreign key for the sender
   content: string; // Message content
 }
 

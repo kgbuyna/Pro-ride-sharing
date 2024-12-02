@@ -1,18 +1,13 @@
 import * as v from "jsr:@valibot/valibot"; // 1.24 kB
-import sequelize from "../db/config.ts";
-
-// Create login schema with email and password
-import * as bcrypt from "jsr:@ts-rex/bcrypt";
+import Users from "../db/models/user.ts";
 
 const isUsernameAvailable = async (username: string) => {
-  const { User } = sequelize.models;
-  const data = await User.findOne({ where: { username } });
+  const data = await Users.findOne({ where: { username } });
   return !data;
 };
 
 const isUsernameNotAvailable = async (username: string) => {
-  const { User } = sequelize.models;
-  const data = await User.findOne({ where: { username } });
+  const data = await Users.findOne({ where: { username } });
   return !!data; // Returns true if the username exists
 };
 
@@ -60,20 +55,3 @@ export const LoginSchema = v.objectAsync({
     v.minLength(8),
   ),
 });
-
-// v.forwardAsync(
-//   v.partialCheckAsync(
-//     [["password"], ["username"]],
-//     async (input) => {
-//       const { User } = sequelize.models;
-//       const user = await User.findOne({
-//         where: {
-//           username: input.username,
-//         },
-//       });
-//       return bcrypt.verify(input.password, user.password);
-//     },
-//     "Wrong password.",
-//   ),
-//   ["password"],
-// ),

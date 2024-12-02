@@ -7,7 +7,7 @@ export const assertDbConnection = async () => {
   try {
     await sequelize.authenticate();
     setupAssociations();
-    // sequelize.sync({ alter: true });
+    sequelize.sync({ alter: true });
 
     console.log("Connection has been established successfully.");
   } catch (error) {

@@ -1,12 +1,13 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config.ts";
+import { id } from "../../types/base.ts";
 
 // Define ConversationAttributes
 interface ConversationAttributes {
-  id: number; // Primary key
-  user1Id: number; // Foreign key for the first user
-  user2Id: number; // Foreign key for the second user
-  lastMessageId?: number | null; // Optional, foreign key for the last message
+  id: id; // Primary key
+  user1Id: id; // Foreign key for the first user
+  user2Id: id; // Foreign key for the second user
+  lastMessageId?: id | null; // Optional, foreign key for the last message
 }
 
 // Define optional attributes for creation
