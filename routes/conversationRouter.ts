@@ -4,27 +4,29 @@ import SendMessageSchema from "../validators/sendMessageSchema.ts";
 import {
   createConversationByUserController,
   getConversationsByUserController,
+  getMessagesByConversationIdController,
   sendMessageToConversationController,
 } from "../controllers/conversationController.ts";
-import { getMessagesByConversationId } from "../services/messageService.ts";
 
 const conversationRouter = new Router();
 
 conversationRouter.get("/", getConversationsByUserController);
 
-conversationRouter.use(validator(SendMessageSchema)).post(
+conversationRouter.post(
   "/:receiverId/message",
+  validator(SendMessageSchema),
   createConversationByUserController,
 );
 
-conversationRouter.use(validator(SendMessageSchema)).post(
+conversationRouter.post(
   "/:conversationId/messages",
+  validator(SendMessageSchema),
   sendMessageToConversationController,
 );
 
 conversationRouter.get(
   "/:conversationId/messages",
-  getMessagesByConversationId,
+  getMessagesByConversationIdController,
 );
 
 export default conversationRouter;
