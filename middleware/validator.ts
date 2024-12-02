@@ -17,7 +17,10 @@ export const validator: validatorType =
 
       if (data.success) {
         debug(data.output);
-        ctx.state = data.output;
+        ctx.state = {
+          ...ctx.state,
+          ...data.output,
+        };
         await next();
       } else {
         ctx.response.status = 400;

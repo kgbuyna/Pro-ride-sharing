@@ -1,5 +1,5 @@
 import * as v from "jsr:@valibot/valibot"; // 1.24 kB
-import { sequelize } from "../db/index.ts";
+import sequelize from "../db/config.ts";
 
 // Create login schema with email and password
 import * as bcrypt from "jsr:@ts-rex/bcrypt";

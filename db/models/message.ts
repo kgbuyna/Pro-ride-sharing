@@ -1,34 +1,51 @@
-import { DataTypes } from "sequelize";
-// import { sequelize } from "../index.ts";
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "../config.ts";
+// Define MessageAttributes
+interface MessageAttributes {
+  id: number; // Primary key
+  conversationId: number; // Foreign key for the conversation
+  senderId: number; // Foreign key for the sender
+  content: string; // Message content
+}
 
-import { Sequelize } from "sequelize";
+// Define optional attributes for creation
+type MessageCreationAttributes = Optional<MessageAttributes, "id">;
 
-export const defineMessageModel = (sequelize: Sequelize) =>
-  sequelize.define(
-    "Message",
-    {
-      conversationId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: "Conversations", // Adjust to your Users table name
-          key: "id",
-        },
-      },
-      senderId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: "Users", // Name of the Users table
-          key: "id",
-        },
-      },
-      content: {
-        type: DataTypes.STRING,
-        allowNull: false,
+// Define the Message model
+export default class Messages
+  extends Model<MessageAttributes, MessageCreationAttributes> {}
+
+Messages.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    conversationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Conversations", // Name of the Conversations table
+        key: "id",
       },
     },
-    {
-      // Other model options go here
+    senderId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Users", // Name of the Users table
+        key: "id",
+      },
     },
-  );
+    content: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    sequelize,
+    modelName: "Messages", // Explicit table name (optional)
+    timestamps: true, // Automatically add createdAt and updatedAt fields
+  },
+);
