@@ -1,13 +1,9 @@
-import { Middleware } from "@oak/oak/middleware";
-import jwt from "npm:jsonwebtoken";
-import { debug } from "../utils/debug.ts";
-import { Context } from "@oak/oak/context";
 import { AppContext } from "../types/base.ts";
 
-export async function errorHandler(
+export const errorHandler = async (
   ctx: AppContext,
-  next: () => Promise<unknown>,
-) {
+  next,
+) => {
   try {
     await next(); // Pass to the next middleware
   } catch (err) {
@@ -19,4 +15,4 @@ export async function errorHandler(
       message: err.message || "Internal Server Error",
     };
   }
-}
+};

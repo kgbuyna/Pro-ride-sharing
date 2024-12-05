@@ -1,11 +1,11 @@
 import { RouterContext } from "@oak/oak/router";
-import { Middleware } from "@oak/oak/middleware";
+import { Middleware, MiddlewareOrMiddlewareObject } from "@oak/oak/middleware";
 import { debug } from "../utils/debug.ts";
 import * as v from "jsr:@valibot/valibot"; // 1.24 kB
 
 type validatorType = (
   schema: v.SchemaWithPipeAsync<any> | v.SchemaWithPipe<any>,
-) => (ctx: RouterContext, next: any) => Promise<Middleware>;
+) => (ctx: RouterContext, next: any) => Promise<MiddlewareOrMiddlewareObject>;
 
 export const validator: validatorType =
   (schema) => async (ctx: RouterContext, next: any) => {
