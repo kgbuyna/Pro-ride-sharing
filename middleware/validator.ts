@@ -2,6 +2,7 @@ import { RouterContext } from "@oak/oak/router";
 import { Middleware, MiddlewareOrMiddlewareObject } from "@oak/oak/middleware";
 import { debug } from "../utils/debug.ts";
 import * as v from "jsr:@valibot/valibot"; // 1.24 kB
+import { Status } from "jsr:@oak/commons@1/status";
 
 type validatorType = (
   schema: v.SchemaWithPipeAsync<any> | v.SchemaWithPipe<any>,
@@ -23,10 +24,11 @@ export const validator: validatorType =
         };
         await next();
       } else {
-        ctx.response.status = 400;
+        ctx.response.status = 200;
         ctx.response.body = {
-          message: "Хэрэглэгчийн мэдээлэл буруу байна",
-          errors: data.issues.map((issue) => issue.message),
+          status: "error",
+          // message: "Хэрэглэгчийн мэдээлэл буруу байна",
+          messages: data.issues.map((issue) => issue.message),
         };
         return;
       }
@@ -36,10 +38,11 @@ export const validator: validatorType =
         ctx.state = data.output;
         next();
       } else {
-        ctx.response.status = 400;
+        ctx.response.status = 200;
         ctx.response.body = {
-          message: "Хэрэглэгчийн мэдээлэл буруу байна",
-          errors: data.issues.map((issue) => issue.message),
+          status: "error",
+          // message: "Хэрэглэгчийн мэдээлэл буруу байна",
+          messages: data.issues.map((issue) => issue.message),
         };
         return;
       }
