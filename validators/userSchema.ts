@@ -18,7 +18,7 @@ export const RegisterSchema = v.pipeAsync(
       v.minLength(2),
       v.checkAsync(isUsernameAvailable, "Username is already taken."),
     ),
-    email: v.pipe(v.string(), v.email()),
+    email: v.optional(v.pipe(v.string(), v.email())),
     lastName: v.optional(v.string()),
     firstName: v.pipe(v.string(), v.trim()),
     password: v.pipe(

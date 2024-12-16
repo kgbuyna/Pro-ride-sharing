@@ -26,6 +26,21 @@ export const createUser = async (userData) => {
   return user;
 };
 
+export const handleRegister = async (userData) => {
+  const user = await createUser(userData);
+  const { id, username } = user.dataValues;
+
+  const token = jwt.sign(
+    { id, username },
+    Deno.env.get("SECRET"),
+    {
+      expiresIn: "3h",
+    },
+  );
+
+  return { token, user };
+};
+
 export const handleLogin = async (providedPassword, username) => {
   const user = await Users.findOne({
     where: {
