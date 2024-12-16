@@ -88,14 +88,8 @@ io.on(
   },
 );
 
-// io.on("connection", (socket)=>{
-//   socket.on("")
-// })
-
-// router
-//   .get("/ws", handleSocket);
 app.use(oakCors({ origin: "*" })); // Enable CORS for All Routes
 app.use(errorHandler);
 app.use(router.routes());
 
-await app.listen({ port: 4000 });
+await app.listen({ port: 9999 });
