@@ -4,10 +4,8 @@ import {
   getConversationsByUserId,
   sendMessageToConversation,
 } from "../services/conversationService.ts";
-import { debug } from "../utils/debug.ts";
 import { getMessagesByConversationId } from "../services/messageService.ts";
 import { AppContext } from "../types/base.ts";
-import { MessageAttributes } from "../db/models/message.ts";
 
 export const getConversationsByUserController: Middleware = async (
   ctx,
