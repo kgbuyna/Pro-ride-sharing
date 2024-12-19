@@ -1,4 +1,6 @@
 import { Context } from "@oak/oak/context";
+import { State } from "@oak/oak/application";
+import { Response } from "@oak/oak/response";
 
 export type id = number & { __brand: "id" };
 // Generic Response Type
@@ -24,6 +26,22 @@ export type ApiResponse =
     }; // Optional: Contains error information
   };
 
-export type AppContext = Context & {
-  response: Context["response"] & { body: ApiResponse };
+// export type AppContext<
+//   T extends State = Record<string, any>,
+//   K extends State = Record<string, any>,
+// > =
+//   & Context<T, K>
+//   & {
+//     response: Context["response"] & { body: ApiResponse };
+//   };
+export interface AppContext<
+  StateT extends State = ContextState,
+  CustomT extends State = Record<string, any>,
+> extends Context<StateT, CustomT> {
+  response: Response & { body: ApiResponse };
+}
+
+export type ContextState = {
+  userId: id;
+  username: string;
 };
