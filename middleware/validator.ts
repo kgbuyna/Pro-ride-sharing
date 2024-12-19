@@ -1,50 +1,35 @@
-import { RouterContext } from "@oak/oak/router";
-import { Middleware, MiddlewareOrMiddlewareObject } from "@oak/oak/middleware";
-import { debug } from "../utils/debug.ts";
+import { Next } from "@oak/oak/middleware";
 import * as v from "jsr:@valibot/valibot"; // 1.24 kB
-import { Status } from "jsr:@oak/commons@1/status";
+import { AppContext, ContextState } from "../types/base.ts";
 
 type validatorType = (
-  schema: v.SchemaWithPipeAsync<any> | v.SchemaWithPipe<any>,
-) => (ctx: RouterContext, next: any) => Promise<MiddlewareOrMiddlewareObject>;
+  schema: v.AnySchema,
+) => (
+  ctx: AppContext<ContextState>,
+  next: Next,
+) => Promise<void>;
 
 export const validator: validatorType =
-  (schema) => async (ctx: RouterContext, next: any) => {
+  (schema) => async (ctx: AppContext<ContextState>, next) => {
     const body = await ctx.request.body.json();
-    if (schema.async) {
-      const data = await v.safeParseAsync(schema, body).catch((err) => {
-        console.log(err);
-      });
 
-      if (data.success) {
-        debug(data.output);
-        ctx.state = {
-          ...ctx.state,
-          ...data.output,
-        };
-        await next();
-      } else {
-        ctx.response.status = 200;
-        ctx.response.body = {
-          status: "error",
-          // message: "Хэрэглэгчийн мэдээлэл буруу байна",
-          messages: data.issues.map((issue) => issue.message),
-        };
-        return;
-      }
+    const data = schema.async
+      ? await v.safeParseAsync(schema, body)
+      : v.safeParse(schema, body);
+
+    if (data.success) {
+      ctx.state = {
+        ...ctx.state,
+        ...data.output,
+      };
+      await next();
     } else {
-      const data = v.safeParse(schema, body);
-      if (data.success) {
-        ctx.state = data.output;
-        next();
-      } else {
-        ctx.response.status = 200;
-        ctx.response.body = {
-          status: "error",
-          // message: "Хэрэглэгчийн мэдээлэл буруу байна",
-          messages: data.issues.map((issue) => issue.message),
-        };
-        return;
-      }
+      ctx.response.status = 200;
+      ctx.response.body = {
+        status: "error",
+        messages: (data.issues as v.ValiError<v.AnySchema>[]).map((issue) =>
+          issue.message
+        ),
+      };
     }
   };
