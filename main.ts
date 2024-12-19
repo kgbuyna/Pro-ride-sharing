@@ -1,6 +1,6 @@
 import "@std/dotenv/load";
 import { Server } from "https://deno.land/x/socket_io/mod.ts";
-import { Application } from "jsr:@oak/oak/application";
+import { Application, State } from "jsr:@oak/oak/application";
 import { Router } from "jsr:@oak/oak/router";
 import jwt from "npm:jsonwebtoken";
 import { assertDbConnection } from "./db/index.ts";
@@ -13,8 +13,9 @@ import { sendMessageToConversation } from "./services/conversationService.ts";
 import { ClientToServerEvents, ServerToClientEvents } from "./types/socket.ts";
 import { Room } from "https://deno.land/x/socket_io@0.2.0/packages/socket.io/lib/adapter.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
-
-type Context<State = Record<string, any>> = { state: State; b: any };
+import { AppContext, ContextState } from "./types/base.ts";
+import { Context, ContextOptions } from "@oak/oak/context";
+import { MiddlewareOrMiddlewareObject } from "https://jsr.io/@oak/oak/17.1.3/middleware.ts";
 
 const router = new Router();
 
@@ -23,16 +24,42 @@ const io = new Server<
   ServerToClientEvents
 >();
 
-const app = new Application();
+interface CustomContext extends Context {
+  customData?: string; // Add custom properties
+}
+
+class CustomApplication<AS extends State = Record<string, any>>
+  extends Application<AS> {
+  override use<S extends State = Record<string, any>>(
+    middleware: MiddlewareOrMiddlewareObject<
+      S,
+      AppContext<S, Record<string, any>>
+    >,
+    ...middlewares: MiddlewareOrMiddlewareObject<
+      S,
+      AppContext<S, Record<string, any>>
+    >[]
+  ): CustomApplication<S extends AS ? S : S & AS>;
+
+  override use<S extends State = AS>(
+    ...middleware: [
+      MiddlewareOrMiddlewareObject<S, AppContext<S, AS>>,
+      ...MiddlewareOrMiddlewareObject<S, AppContext<S, AS>>[],
+    ]
+  ) {
+    super.#middleware.push(...middleware);
+    super.#composedMiddleware = undefined;
+    // deno-lint-ignore no-explicit-any
+    return this as Application<any>;
+  }
+}
+
+const app = new CustomApplication();
 
 assertDbConnection();
 
 router.use("/auth", authRouter.routes(), authRouter.allowedMethods());
-router.use(
-  "/users",
-  userRouter.routes(),
-  userRouter.allowedMethods(),
-);
+router.use("/users", userRouter.routes(), userRouter.allowedMethods());
 
 router.use(authenticateToken).use(
   "/conversations",
